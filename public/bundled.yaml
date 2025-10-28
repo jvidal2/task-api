@@ -4,53 +4,65 @@ info:
   version: 1.0.0
 servers:
   - url: http://localhost:3000
+tags:
+  - name: Tasks
+    description: Task-related endpoints
 paths:
   /tasks:
     get:
       summary: List all tasks
+      tags:
+        - Tasks
+      parameters:
+        - name: completed
+          in: query
+          required: false
+          description: Filter tasks by completion status
+          schema:
+            type: boolean
+            example: true
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of tasks to return
+          schema:
+            type: integer
+            example: 10
       responses:
         '200':
           description: OK
-  /tasks/{id}:
-    get:
-      summary: Get single task by ID
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: The ID of the task to retrieve
-          schema:
-            type: integer
-            example: 1
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+    post:
+      summary: Create a new task
+      tags:
+        - Tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
       responses:
-        '200':
-          description: Task retrieved successfully
+        '201':
+          description: Task created successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Task'
         '400':
-          description: Validation error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationError'
-        '404':
-          description: Task not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NotFoundError'
+          $ref: '#/components/responses/BadRequest'
 components:
   schemas:
     Task:
       type: object
-      required:
-        - id
-        - title
-        - completed
       properties:
         id:
+          readOnly: true
           type: integer
           example: 1
         title:
@@ -61,9 +73,6 @@ components:
           example: false
     ValidationError:
       type: object
-      required:
-        - error
-        - details
       properties:
         error:
           type: string
@@ -72,13 +81,10 @@ components:
           type: array
           items:
             type: string
-          example:
-            - ID must be a number
-    NotFoundError:
-      type: object
-      required:
-        - error
-      properties:
-        error:
-          type: string
-          example: Task not found
+  responses:
+    BadRequest:
+      description: Invalid input
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
