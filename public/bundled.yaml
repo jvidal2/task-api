@@ -56,10 +56,39 @@ paths:
                 $ref: '#/components/schemas/Task'
         '400':
           $ref: '#/components/responses/BadRequest'
+  /tasks/{id}:
+    summary: Get a single task by ID
+    parameters:
+      - in: path
+        name: id
+        required: true
+        description: Task ID
+        schema:
+          type: integer
+          example: 1
+    responses:
+      '200':
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/Task.yaml
+      '400':
+        $ref: ../components/responses/BadRequest.yaml
+      '404':
+        description: Task not found
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/NotFoundError.yaml
 components:
   schemas:
     Task:
       type: object
+      required:
+        - id
+        - title
+        - completed
       properties:
         id:
           readOnly: true
@@ -73,6 +102,9 @@ components:
           example: false
     ValidationError:
       type: object
+      required:
+        - error
+        - details
       properties:
         error:
           type: string
@@ -81,6 +113,8 @@ components:
           type: array
           items:
             type: string
+          example:
+            - ID must be a number
   responses:
     BadRequest:
       description: Invalid input
